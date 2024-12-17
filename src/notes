@@ -1,0 +1,196 @@
+# Design Patterns & OOP Principles in Load Balancer Implementation
+
+## Table of Contents
+- [Design Patterns](#design-patterns)
+  - [Strategy Pattern](#strategy-pattern)
+  - [State Pattern](#state-pattern)
+  - [Singleton Pattern](#singleton-pattern)
+  - [Factory Pattern](#factory-pattern)
+  - [Builder Pattern](#builder-pattern)
+  - [Prototype Pattern](#prototype-pattern)
+  - [Proxy Pattern](#proxy-pattern)
+  - [Template Pattern](#template-pattern)
+  - [Adapter Pattern](#adapter-pattern)
+  - [Decorator Pattern](#decorator-pattern)
+  - [Observer Pattern](#observer-pattern)
+  - [Iterator Pattern](#iterator-pattern)
+  - [Memento Pattern](#memento-pattern)
+- [OOP Principles Implementation](#oop-principles-implementation)
+  - [Encapsulation](#encapsulation)
+  - [Inheritance](#inheritance)
+  - [Polymorphism](#polymorphism)
+  - [Abstraction](#abstraction)
+  - [Interface Segregation](#interface-segregation)
+  - [Single Responsibility](#single-responsibility)
+
+## Design Patterns
+
+### Strategy Pattern
+The Strategy pattern enables the selection of algorithms at runtime. It's particularly useful for implementing the Open/Closed Principle from SOLID principles.
+
+**Load Balancer Example:**
+- Instance registration followed by retrieval
+- Two implementation strategies:
+  1. RandomLoadBalancer: Randomly selects instances
+  2. RoundRobin: Selects instances sequentially
+
+Use cases:
+- Multiple algorithms available for a specific task
+- Client decides implementation at runtime
+- Algorithm can be passed as a parameter
+
+### State Pattern
+Changes object behavior based on its internal state. Implements state-dependent behavior through state variables and conditional logic.
+
+### Singleton Pattern
+Ensures only one instance of a class exists throughout the application lifecycle.
+
+### Factory Pattern
+Creates objects without exposing instantiation logic:
+- Utilizes a super class (interface/abstract/concrete)
+- Subclasses inherit from super class
+- Factory class returns appropriate subclass based on parameters
+
+### Builder Pattern
+Useful when:
+- Complex object construction is needed
+- Too many constructor parameters
+- Uses static nested class with required attributes
+
+### Prototype Pattern
+- Used when object creation is resource-intensive
+- Provides mechanism for object cloning
+- Implements Java cloning functionality
+
+### Proxy Pattern
+- Provides controlled access to objects
+- Acts as a placeholder for another object
+- Usually implemented through interfaces
+
+### Template Pattern
+- Defines method implementation framework for subclasses
+- Fixed order of steps
+- Template methods often declared as final
+
+### Adapter Pattern
+Enables compatibility between unrelated interfaces.
+
+### Decorator Pattern
+Modifies object functionality at runtime.
+
+### Observer Pattern
+- Monitors state changes in objects
+- Observer objects watch state of subject
+- Native support in Java
+
+### Iterator Pattern
+- Provides traversal mechanism for object collections
+- Abstracts underlying implementation
+- Utilized in Java Collections
+
+### Memento Pattern
+- Saves/restores object state
+- Uses private inner class
+- Maintains encapsulation
+
+## OOP Principles Implementation
+
+### Encapsulation
+```java
+public class LoadBalancer {
+    private List<ServerInstance> instanceList;
+    private Random random;
+
+    public void addServerInstance(ServerInstance instance) {
+        // Implementation
+    }
+
+    public List<ServerInstance> getInstances() {
+        return new ArrayList<>(instanceList); // Protected copy
+    }
+}
+```
+
+### Inheritance
+```java
+public abstract class BaseLoadBalancer {
+    protected List<ServerInstance> instances;
+    
+    public abstract ServerInstance selectServer();
+    
+    public void addServer(ServerInstance server) {
+        instances.add(server);
+    }
+}
+
+public class RandomLoadBalancer extends BaseLoadBalancer {
+    @Override
+    public ServerInstance selectServer() {
+        return instances.get(random.nextInt(instances.size()));
+    }
+}
+```
+
+### Polymorphism
+```java
+public interface LoadBalancerStrategy {
+    ServerInstance selectServer(List<ServerInstance> servers);
+}
+
+public class RandomStrategy implements LoadBalancerStrategy {
+    @Override
+    public ServerInstance selectServer(List<ServerInstance> servers) {
+        return servers.get(new Random().nextInt(servers.size()));
+    }
+}
+```
+
+### Abstraction
+```java
+public interface Server {
+    boolean isHealthy();
+    void handleRequest(Request request);
+    URL getAddress();
+}
+
+public class ServerInstance implements Server {
+    private URL backendURL;
+    private int currentLoad;
+
+    @Override
+    public boolean isHealthy() {
+        return checkHealth();
+    }
+}
+```
+
+### Interface Segregation
+```java
+public interface LoadBalancing {
+    ServerInstance getServer();
+    void addServer(ServerInstance server);
+}
+
+public interface HealthChecking {
+    boolean isHealthy();
+    List<ServerInstance> getUnhealthyServers();
+}
+
+public interface Monitoring {
+    int getTotalRequests();
+    double getAverageResponseTime();
+}
+```
+
+### Single Responsibility
+```java
+public class LoadBalancer {
+    private ServerSelector selector;
+    private HealthChecker healthChecker;
+    private ServerRegistry registry;
+
+    public ServerInstance getServer() {
+        return selector.select(registry.getHealthyServers());
+    }
+}
+```
